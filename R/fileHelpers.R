@@ -1,4 +1,5 @@
 filePath <- function(language, fileName) {
+  dir.create(file.path(language), showWarnings = FALSE)
   path <- file.path(language, paste(fileName, "csv", sep = "."))
   return(path)
 }

@@ -1,40 +1,70 @@
-copyTranslationsToGPCH <-
-  function(to.components,
+#' Copy and edit translation files
+#'
+#' Download translation files for a Weblate project, edit them (search/replace &
+#'  filter unwanted terms) and then reupload them to the same or a different
+#'  Weblate project.
+#'
+#' @param components A list of component names (slugs).
+#' @param to.language The language to copy to.
+#' @param from.project The project to copy from.
+#' @param from.language The language to copy from.
+#' @param filter List of strings. Translations containing any of these strings will not be reuploaded.
+#' @param replace Data frame of search/replace string pairs.
+#' @param conflict How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
+#' @param verbose Whether to print a detailed log to the console or not.
+#'
+#' @return Count of accepted new translations in the destination project.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' updateCount <- copyTranslations(components = "address",
+#'                                 to.language = "de_CH",
+#'                                 from.project = "gpde",
+#'                                 from.language = "de",
+#'                                 filter = "Deutschland",
+#'                                 replace = as.data.frame(cbind(pattern = c("ß"),
+#'                                                               replace = c("ss"))))
+#'}
+copyTranslations <-
+  function(components,
            to.language,
-           from.country,
+           from.project,
            from.language,
            filter,
            replace,
-           conflict = "ignore") { # This is also the default server-side.
+           conflict = "ignore",
+           verbose = FALSE) {
     outcomes <- data.frame(matrix(ncol = 8, nrow = 0))
 
     # Copy
-    for (slug in to.components) {
-      cat(slug)
-      cat("\n")
-      response <- getFile(slug, from.country, from.language)
+    for (slug in components) {
+      if(verbose) cat(paste(slug, "\n"))
+      response <- getFile(slug = slug, from.project = from.project, from.language = from.language, verbose = verbose)
       if (response$status_code == 200) {
         if (!missing(filter) || !missing(replace)) {
           editTranslationFile(slug, from.language, filter, replace)
         }
         response <-
-          postFile(slug, to.language, from.language, conflict)
+          postFile(slug = slug, to.language = to.language, from.language = from.language, conflict = conflict, verbose = verbose)
         if (response$status_code == 413) {
           splitTranslationFile(slug, from.language)
           response1 <-
             postFile(
-              slug,
-              to.language,
-              from.language,
-              conflict,
+              slug = slug,
+              to.language = to.language,
+              from.language = from.language,
+              conflict = conflict,
+              verbose = verbose,
               filename = paste(slug, "- 1")
             )
           response2 <-
             postFile(
-              slug,
-              to.language,
-              from.language,
-              conflict,
+              slug = slug,
+              to.language = to.language,
+              from.language = from.language,
+              conflict = conflict,
+              verbose = verbose,
               filename = paste(slug, "- 2")
             )
           responselist <- list(response1, response2)
@@ -60,37 +90,49 @@ copyTranslationsToGPCH <-
     log_components <-
       rbind(c("Total", sum(outcomes$'status code' != 200), colSums(outcomes[,-c(1,2)])), outcomes)
 
+    dir.create(file.path("logs"), showWarnings = FALSE)
     write.csv(
       log_components,
       paste(
         "logs/",
         format(Sys.time(), "%Y-%m-%d %H%M%S "),
-        from.country,
+        from.project,
         from.language,
         " outcomes.csv",
         sep = ""
       ),
       row.names = FALSE
     )
-    log_total <- read.csv("log.csv")
+    if (file_test("-f", "log.csv")) {
+      log_total <- read.csv("log.csv")
+    } else {
+      log_total <- data.frame(matrix(ncol = 9, nrow = 0))
+      colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
+    }
+
     log_total <- rbind(c(
       format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-      paste(from.country, from.language),
+      paste(from.project, from.language),
       paste("gpch", to.language),
       colSums(outcomes[,-c(1,2)])
     ), log_total)
     write.csv(log_total, "log.csv", row.names = FALSE)
-    cat(paste("DONE: Accepted",
+    if(verbose) cat(paste("DONE: Accepted ",
               sum(outcomes$accepted),
-              "new translations into language",
+              " new translations into ",
+              wenv$TO_PROJECT,
+              "/",
               to.language,
-              "from country",
-              from.country))
-    cat("\n")
+              " from ",
+              from.project,
+              "/",
+              from.language),
+              "\n", sep = "")
+    return(sum(outcomes$accepted))
   }
 
 logEntry <- function(component, response) {
-  result <- content(response)
+  result <- httr::content(response)
   if (response$status_code != 200) {
     result <- list(not_found = 0,
                    skipped = 0,

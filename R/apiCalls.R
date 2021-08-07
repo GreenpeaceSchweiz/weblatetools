@@ -1,15 +1,15 @@
 getComponents <- function(country) {
   componentsUrl <-
-    file.path(BASE_URL, "projects", country, "components")
+    file.path(wenv$BASE_URL, "projects", country, "components")
 
   components <- data.frame(matrix(ncol = 2, nrow = 0))
   colnames(components) <- c("component", "slug")
 
   while (!is.null(componentsUrl)) {
-    response <- GET(url = componentsUrl,
-                    config = add_headers(Authorization = TOKEN))
+    response <- httr::GET(url = componentsUrl,
+                          config = httr::add_headers(Authorization = wenv$TOKEN))
 
-    content <- content(response)
+    content <- httr::content(response)
 
     componentsUrl <- content$'next'
 
@@ -22,24 +22,23 @@ getComponents <- function(country) {
   return(components)
 }
 
-getFile <- function(slug, country, language) {
+getFile <- function(slug, from.project, from.language, verbose = FALSE) {
   downloadUrl <- paste(
-    BASE_URL,
+    wenv$BASE_URL,
     "translations",
-    country,
+    from.project,
     slug,
-    language,
+    from.language,
     "file?format=csv",
     sep = "/"
   )
-  response <- GET(
+  response <- httr::GET(
     url = downloadUrl,
-    config = add_headers(Authorization = TOKEN),
-    write_disk(filePath(language, slug), overwrite = TRUE)
+    config = httr::add_headers(Authorization = wenv$TOKEN),
+    httr::write_disk(filePath(from.language, slug), overwrite = TRUE) # TODO don't write to disk or make optional
   )
 
-  cat(paste(">> getting", http_status(response)$message, sep = " - "))
-  cat("\n")
+  if(verbose) cat(paste(">> getting - ", httr::http_status(response)$message, "\n"))
   return(response)
 }
 
@@ -48,25 +47,25 @@ postFile <-  function(slug,
                       to.language,
                       from.language,
                       conflict = "ignore",
-                      filename) {
+                      filename,
+                      verbose = FALSE) {
   if (missing(filename)) {
     filename <- slug
   }
-  uploadUrl <- paste(BASE_URL,
+  uploadUrl <- paste(wenv$BASE_URL,
                      "translations",
-                     "gpch", # NEVER CHANGE. ONLY WRITE TO SWITZERLAND
+                     wenv$TO_PROJECT, # TODO: highlight importance of setting this right.
                      slug,
                      to.language,
                      "file/",
                      sep = "/")
-  response <- POST(url = uploadUrl,
-                   config = add_headers(Authorization = TOKEN),
-                   body = list(file = upload_file(filePath(
+  response <- httr::POST(url = uploadUrl,
+                   config = httr::add_headers(Authorization = wenv$TOKEN),
+                   body = list(file = httr::upload_file(filePath(
                      from.language, filename)
                    ),
                    conflict = conflict)
   )
-  cat(paste(">> writing", http_status(response)$message, sep = " - "))
-  cat("\n")
+  if(verbose) cat(paste(">> writing - ", httr::http_status(response)$message, "\n"))
   return(response)
 }
