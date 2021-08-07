@@ -44,7 +44,7 @@ library(weblatetools)
 
 # copyTranslations() stores the translation files and creates log files.
 # Choose an appropriate working directory. 
-setwd("/myproject")
+setwd("~/myproject")
 
 # Initialize some base parameters. "to.project" is set here instead of in 
 # copyTranslations() to avoid mistakenly writing to the wrong project.
