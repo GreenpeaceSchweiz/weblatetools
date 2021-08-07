@@ -107,7 +107,6 @@ copyTranslations <-
       log_total <- read.csv("log.csv")
     } else {
       log_total <- data.frame(matrix(ncol = 9, nrow = 0))
-      colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
     }
 
     log_total <- rbind(c(
@@ -116,6 +115,7 @@ copyTranslations <-
       paste("gpch", to.language),
       colSums(outcomes[,-c(1,2)])
     ), log_total)
+    colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
     write.csv(log_total, "log.csv", row.names = FALSE)
     if(verbose) cat(paste("DONE: Accepted ",
               sum(outcomes$accepted),
