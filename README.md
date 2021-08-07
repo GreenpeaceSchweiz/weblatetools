@@ -40,14 +40,17 @@ setup(api.url = "https://example.com/api",
       token = readLines("token.txt"),
       to.project = "B")
 
+# Working with the components from the destination project is recommended.
+# If, during the copy process, you try to get a component that does not exist in
+# the source project, it will simply be skipped.
 components <- getComponents("B")
 
-updateCount <- weblatetools::copyTranslations(components = components$slugs,
-                                to.language = "de",
-                                from.project = "A",
-                                from.language = "de",
-                                filter = "filter this translation",
-                                replace = as.data.frame(cbind(pattern = c("replace me"),
-                                                              replace = c("with this"))),
-                                verbose = TRUE)
+copyTranslations(components = components$slugs,
+                 to.language = "lang",
+                 from.project = "A",
+                 from.language = "lang",
+                 filter = "filter this translation",
+                 replace = as.data.frame(cbind(pattern = c("replace me"),
+                                               replace = c("with this"))),
+                 verbose = TRUE)
 ```
