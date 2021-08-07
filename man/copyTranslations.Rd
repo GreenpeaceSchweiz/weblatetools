@@ -11,7 +11,8 @@ copyTranslations(
   from.language,
   filter,
   replace,
-  conflict = "ignore"
+  conflict = "ignore",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ copyTranslations(
 \item{replace}{Data frame of search/replace string pairs.}
 
 \item{conflict}{How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".}
+
+\item{verbose}{Whether to print a detailed log to the console or not.}
 }
 \value{
 Count of accepted new translations in the destination project.
@@ -41,7 +44,7 @@ Weblate project.
 \dontrun{
 updateCount <- copyTranslations(components = "address",
                                 to.language = "de_CH",
-                                from.project = "GPDE",
+                                from.project = "gpde",
                                 from.language = "de",
                                 filter = "Deutschland",
                                 replace = as.data.frame(cbind(pattern = c("ÃŸ"),

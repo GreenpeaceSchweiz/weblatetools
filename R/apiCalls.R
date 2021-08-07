@@ -1,6 +1,12 @@
-getComponents <- function(country) {
+#' Get all components within a project.
+#'
+#' @param project The project you want to get the list of components from.
+#'
+#' @return A data frame with names and slugs for all components in the project.
+#' @export
+getComponents <- function(project) {
   componentsUrl <-
-    file.path(wenv$BASE_URL, "projects", country, "components")
+    file.path(wenv$BASE_URL, "projects", project, "components")
 
   components <- data.frame(matrix(ncol = 2, nrow = 0))
   colnames(components) <- c("component", "slug")
