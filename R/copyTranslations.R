@@ -8,10 +8,10 @@
 #' @param to.language The language to copy to.
 #' @param from.project The project to copy from.
 #' @param from.language The language to copy from.
-#' @param filter List of strings. Translations containing any of these strings will not be reuploaded.
-#' @param replace Data frame of search/replace string pairs.
-#' @param conflict How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
-#' @param verbose Whether to print a detailed log to the console or not.
+#' @param filter Optional. List of strings. Translations containing any of these strings will not be reuploaded.
+#' @param replace Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".
+#' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
+#' @param verbose Optional. Whether to print a detailed log to the console or not.
 #'
 #' @return Count of accepted new translations in the destination project.
 #' @export
