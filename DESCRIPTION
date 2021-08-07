@@ -1,13 +1,14 @@
 Package: weblatetools
-Title: What the Package Does (One Line, Title Case)
+Title: Download, Edit, and Upload Weblate Translation Files
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Simon",
+           family = "Kaiser",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "sim.kai@bluewin.ch")
+Description: This package provides a function to download translation files
+    for a Weblate project, edit them (search/replace & filter unwanted terms)
+    and then reupload them to the same or a different Weblate project.
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
