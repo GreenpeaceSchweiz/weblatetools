@@ -2,4 +2,6 @@
 
 export(copyTranslations)
 export(getComponents)
+export(getFile)
+export(postFile)
 export(setup)

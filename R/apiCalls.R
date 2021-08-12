@@ -28,6 +28,20 @@ getComponents <- function(project) {
   return(components)
 }
 
+#' Download a translation file.
+#'
+#' Download a translation file from the location specified by a combination of
+#' Project, Component, and Language.
+#' The file is written to disk at "~/[from.language]/[slug].csv". Existing files
+#' are overwritten.
+#'
+#' @param slug The slug of the component to download the translation file from.
+#' @param from.project The project to download the file from.
+#' @param from.language The language to download the file from.
+#' @param verbose Optional. Whether to print a detailed log to the console or not.
+#'
+#' @return The response from the server, as returned by httr::GET().
+#' @export
 getFile <- function(slug, from.project, from.language, verbose = FALSE) {
   downloadUrl <- paste(
     wenv$BASE_URL,
@@ -49,9 +63,23 @@ getFile <- function(slug, from.project, from.language, verbose = FALSE) {
 }
 
 
+#' Upload a translation file
+#'
+#' Upload the translation file stored at "~/[from.language]/[slug].csv" to the
+#' specified language in the project defined in setup().
+#'
+#' @param slug The slug of the component to upload to.
+#' @param to.language The language to upload to.
+#' @param from.directory The directory the file is saved in.
+#' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
+#' @param filename Optional, defaults to [slug]. Name of the file, without ".csv" ending.
+#' @param verbose Optional. Whether to print a detailed log to the console or not.
+#'
+#' @return The response from the server, as returned by httr::POST().
+#' @export
 postFile <-  function(slug,
                       to.language,
-                      from.language,
+                      from.directory,
                       conflict = "ignore",
                       filename,
                       verbose = FALSE) {

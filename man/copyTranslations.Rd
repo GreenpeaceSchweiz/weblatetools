@@ -24,13 +24,13 @@ copyTranslations(
 
 \item{from.language}{The language to copy from.}
 
-\item{filter}{List of strings. Translations containing any of these strings will not be reuploaded.}
+\item{filter}{Optional. List of strings. Translations containing any of these strings will not be reuploaded.}
 
-\item{replace}{Data frame of search/replace string pairs.}
+\item{replace}{Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".}
 
-\item{conflict}{How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".}
+\item{conflict}{Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".}
 
-\item{verbose}{Whether to print a detailed log to the console or not.}
+\item{verbose}{Optional. Whether to print a detailed log to the console or not.}
 }
 \value{
 Count of accepted new translations in the destination project.

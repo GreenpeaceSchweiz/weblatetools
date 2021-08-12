@@ -6,11 +6,11 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This package provides functions to (1) get a list of components for a
-given Weblate project, and (2) download translation files for such a
-list of components from a Weblate project, edit them (search/replace &
-filter unwanted terms) and then reupload them to matching components in
-the same or a different Weblate project.
+This package provides functions to: (1) get a list of components for a
+given Weblate project (2) download and upload translation files for
+components in a Weblate project (3) bulk copy translation files for a
+list of components between Weblate projects, while editing them to
+search/replace and/or filter unwanted terms
 
 ## Installation
 
