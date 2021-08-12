@@ -19,10 +19,10 @@ knitr::opts_chunk$set(
 <!-- badges: end -->
 
 This package provides functions to:
-(1) get a list of components for a given Weblate project
-(2) download and upload translation files for components in a Weblate project
-(3) bulk copy translation files for a list of components between Weblate projects, 
-while editing them to search/replace and/or filter unwanted terms
+
+1. get a list of components for a given Weblate project
+2. download and upload translation files for components in a Weblate project
+3. bulk copy translation files for a list of components between Weblate projects, while editing them to search/replace and/or filter unwanted terms
 
 ## Installation
 
@@ -47,7 +47,8 @@ library(weblatetools)
 setwd("~/myproject")
 
 # Initialize some base parameters. "to.project" is set here instead of in 
-# copyTranslations() to avoid mistakenly writing to the wrong project.
+# copyTranslations() or postFile() to avoid mistakenly writing to the wrong 
+# project.
 setup(api.url = "https://example.com/api",
       token = readLines("token.txt"),
       to.project = "B")
