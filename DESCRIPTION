@@ -11,8 +11,7 @@ Description: This package provides functions to (1) get a list of components for
     for such a list of components from a Weblate project, edit them 
     (search/replace & filter unwanted terms) and then reupload them to matching 
     components in the same or a different Weblate project.
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
