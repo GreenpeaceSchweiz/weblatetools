@@ -12,7 +12,7 @@ This package provides functions to:
 2.  download and upload translation files for components in a Weblate
     project
 3.  bulk copy translation files for a list of components between Weblate
-    projects, while editing them to search/replace and/or filter
+    projects, while editing them to search&replace and/or filter
     unwanted terms
 
 ## Installation
@@ -21,7 +21,7 @@ You can install weblatetools from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("sikaiser/weblatetools")
+devtools::install_github("GreenpeaceSchweiz/weblatetools")
 ```
 
 ## Example
