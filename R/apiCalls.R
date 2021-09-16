@@ -96,7 +96,7 @@ postFile <-  function(slug,
   response <- httr::POST(url = uploadUrl,
                    config = httr::add_headers(Authorization = wenv$TOKEN),
                    body = list(file = httr::upload_file(filePath(
-                     from.language, filename)
+                     from.directory, filename)
                    ),
                    conflict = conflict)
   )

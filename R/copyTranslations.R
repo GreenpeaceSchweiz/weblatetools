@@ -46,14 +46,14 @@ copyTranslations <-
           editTranslationFile(slug, from.language, filter, replace)
         }
         response <-
-          postFile(slug = slug, to.language = to.language, from.language = from.language, conflict = conflict, verbose = verbose)
+          postFile(slug = slug, to.language = to.language, from.directory = from.language, conflict = conflict, verbose = verbose)
         if (response$status_code == 413) {
           splitTranslationFile(slug, from.language)
           response1 <-
             postFile(
               slug = slug,
               to.language = to.language,
-              from.language = from.language,
+              from.directory = from.language,
               conflict = conflict,
               verbose = verbose,
               filename = paste(slug, "- 1")
@@ -62,7 +62,7 @@ copyTranslations <-
             postFile(
               slug = slug,
               to.language = to.language,
-              from.language = from.language,
+              from.directory = from.language,
               conflict = conflict,
               verbose = verbose,
               filename = paste(slug, "- 2")
