@@ -94,7 +94,8 @@ postFile <-  function(slug,
                      "file/",
                      sep = "/")
   response <- httr::POST(url = uploadUrl,
-                   config = httr::add_headers(Authorization = wenv$TOKEN),
+                   httr::add_headers(Authorization = wenv$TOKEN),
+                   httr::config(http_version = 2), # HTTP Version 1.1, to prevent "stream not closed cleanly"
                    body = list(file = httr::upload_file(filePath(
                      from.directory, filename)
                    ),
