@@ -46,33 +46,37 @@ copyTranslations <-
           editTranslationFile(slug, from.language, filter, replace)
         }
         response <-
-          postFile(slug = slug, to.language = to.language, from.directory = from.language, conflict = conflict, verbose = verbose)
-        if (response$status_code == 413) {
-          splitTranslationFile(slug, from.language)
-          response1 <-
-            postFile(
-              slug = slug,
-              to.language = to.language,
-              from.directory = from.language,
-              conflict = conflict,
-              verbose = verbose,
-              filename = paste(slug, "- 1")
-            )
-          response2 <-
-            postFile(
-              slug = slug,
-              to.language = to.language,
-              from.directory = from.language,
-              conflict = conflict,
-              verbose = verbose,
-              filename = paste(slug, "- 2")
-            )
-          responselist <- list(response1, response2)
+          tryposting(slug = slug, to.language = to.language, from.directory = from.language, conflict = conflict, verbose = verbose)
+        if (response$status_code == "failed") {
+          if(verbose) cat(">> writing - Ran out of tries. Skipping this one.\n")
         } else {
-          responselist <- list(response)
-        }
-        for (response in responselist) {
-          outcomes <- rbind(outcomes, logEntry(slug, response))
+          if (response$status_code == 413) {
+            splitTranslationFile(slug, from.language)
+            response1 <-
+              tryposting(
+                slug = slug,
+                to.language = to.language,
+                from.directory = from.language,
+                conflict = conflict,
+                verbose = verbose,
+                filename = paste(slug, "- 1")
+              )
+            response2 <-
+              tryposting(
+                slug = slug,
+                to.language = to.language,
+                from.directory = from.language,
+                conflict = conflict,
+                verbose = verbose,
+                filename = paste(slug, "- 2")
+              )
+            responselist <- list(response1, response2)
+          } else {
+            responselist <- list(response)
+          }
+          for (response in responselist) {
+            outcomes <- rbind(outcomes, logEntry(slug, response))
+          }
         }
       }
     }
@@ -142,4 +146,36 @@ logEntry <- function(component, response) {
                    count = 0)
   }
   return(cbind(component, cbind(response$status_code, as.data.frame(result))))
+}
+
+tryposting <- function(slug, to.language, from.directory, conflict, verbose) {
+  for (attempt in c(1:3)) {
+    success <<- TRUE
+    response <-
+      tryCatch(
+        expr = {
+          postFile(slug = slug, to.language = to.language, from.directory = from.directory, conflict = conflict, verbose = verbose)
+        },
+        error = function(e){
+          success <<- FALSE
+          if (attempt == 1) cat(">> writing -  HTTP error. Trying 3 times.\n")
+          cat(">> writing -  try #")
+          cat(attempt)
+          cat(" \n")
+          print(e)
+        },
+        warning = function(w){
+          print(w)
+        },
+        finally = {
+        }
+      )
+    if (success) {
+      return(response)
+    }
+  }
+  if (!success) {
+    response$status_code <- "failed"
+    return(response)
+  }
 }
