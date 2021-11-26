@@ -61,12 +61,6 @@ copyTranslations <-
                              verbose = verbose)
       responselist <- list(response)
 
-      # Unexpected error 3 times
-      if (response$status_code == "failed") {
-        logger(verbose, ">> writing - Ran out of tries. Skipping this one.")
-        next
-      }
-
       # File too large
       if (response$status_code == 413) {
         splitTranslationFile(slug, from.language)
@@ -151,7 +145,6 @@ copyTranslations <-
   }
 
 logEntry <- function(component, response) {
-  result <- httr::content(response)
   if (response$status_code != 200) {
     result <- list(not_found = 0,
                    skipped = 0,
@@ -159,6 +152,8 @@ logEntry <- function(component, response) {
                    total = 0,
                    result = FALSE,
                    count = 0)
+  } else {
+    result <- httr::content(response)
   }
   return(cbind(component, cbind(response$status_code, as.data.frame(result))))
 }
@@ -188,7 +183,7 @@ tryposting <- function(slug, to.language, from.directory, conflict, filename, ve
     }
   }
   if (!success) {
-    response$status_code <- "failed"
+    response <- list(status_code = "failed")
     return(response)
   }
 }
