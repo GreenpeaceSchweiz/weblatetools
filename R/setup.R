@@ -14,3 +14,7 @@ setup <- function(api.url, token, to.project){
   wenv$TOKEN <- paste("Token", token, sep = " ")
   wenv$TO_PROJECT <- to.project
 }
+
+logger <- function(verbose, message) {
+  if (verbose) cat(paste(message, "\n", sep = ""))
+}

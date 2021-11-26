@@ -58,7 +58,7 @@ getFile <- function(slug, from.project, from.language, verbose = FALSE) {
     httr::write_disk(filePath(from.language, slug), overwrite = TRUE) # TODO don't write to disk or make optional
   )
 
-  if(verbose) cat(paste(">> getting - ", httr::http_status(response)$message, "\n"))
+  logger(verbose, paste(">> getting - ", httr::http_status(response)$message))
   return(response)
 }
 
@@ -101,6 +101,6 @@ postFile <-  function(slug,
                    ),
                    conflict = conflict)
   )
-  if(verbose) cat(paste(">> writing - ", httr::http_status(response)$message, "\n"))
+  logger(verbose, paste(">> writing - ", httr::http_status(response)$message))
   return(response)
 }

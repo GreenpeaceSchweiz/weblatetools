@@ -39,45 +39,61 @@ copyTranslations <-
 
     # Copy
     for (slug in components) {
-      if(verbose) cat(paste(slug, "\n"))
-      response <- getFile(slug = slug, from.project = from.project, from.language = from.language, verbose = verbose)
-      if (response$status_code == 200) {
-        if (!missing(filter) || !missing(replace)) {
-          editTranslationFile(slug, from.language, filter, replace)
-        }
-        response <-
-          tryposting(slug = slug, to.language = to.language, from.directory = from.language, conflict = conflict, verbose = verbose)
-        if (response$status_code == "failed") {
-          if(verbose) cat(">> writing - Ran out of tries. Skipping this one.\n")
-        } else {
-          if (response$status_code == 413) {
-            splitTranslationFile(slug, from.language)
-            response1 <-
-              tryposting(
-                slug = slug,
-                to.language = to.language,
-                from.directory = from.language,
-                conflict = conflict,
-                verbose = verbose,
-                filename = paste(slug, "- 1")
-              )
-            response2 <-
-              tryposting(
-                slug = slug,
-                to.language = to.language,
-                from.directory = from.language,
-                conflict = conflict,
-                verbose = verbose,
-                filename = paste(slug, "- 2")
-              )
-            responselist <- list(response1, response2)
-          } else {
-            responselist <- list(response)
-          }
-          for (response in responselist) {
-            outcomes <- rbind(outcomes, logEntry(slug, response))
-          }
-        }
+      logger(verbose, slug)
+
+      # Get File
+      response <- getFile(slug = slug,
+                          from.project = from.project,
+                          from.language = from.language,
+                          verbose = verbose)
+      if (response$status_code != 200) next # couldn't get file, go to next
+
+      # Edit File
+      if (!missing(filter) || !missing(replace)) {
+        editTranslationFile(slug, from.language, filter, replace)
+      }
+
+      # Post File
+      response <- tryposting(slug = slug,
+                             to.language = to.language,
+                             from.directory = from.language,
+                             conflict = conflict,
+                             verbose = verbose)
+      responselist <- list(response)
+
+      # Unexpected error 3 times
+      if (response$status_code == "failed") {
+        logger(verbose, ">> writing - Ran out of tries. Skipping this one.")
+        next
+      }
+
+      # File too large
+      if (response$status_code == 413) {
+        splitTranslationFile(slug, from.language)
+        response1 <-
+          tryposting(
+            slug = slug,
+            to.language = to.language,
+            from.directory = from.language,
+            conflict = conflict,
+            verbose = verbose,
+            filename = paste(slug, "- 1")
+          )
+        response2 <-
+          tryposting(
+            slug = slug,
+            to.language = to.language,
+            from.directory = from.language,
+            conflict = conflict,
+            verbose = verbose,
+            filename = paste(slug, "- 2")
+          )
+        responselist <- list(response1, response2)
+      }
+
+      # Store outcomes
+      for (response in responselist) {
+        outcomes <- rbind(outcomes, logEntry(slug, response))
       }
     }
 
@@ -121,17 +137,16 @@ copyTranslations <-
     ), log_total)
     colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
     write.csv(log_total, "log.csv", row.names = FALSE)
-    if(verbose) cat(paste("DONE: Accepted ",
-              sum(outcomes$accepted),
-              " new translations into ",
-              wenv$TO_PROJECT,
-              "/",
-              to.language,
-              " from ",
-              from.project,
-              "/",
-              from.language),
-              "\n", sep = "")
+    logger(verbose, paste("DONE: Accepted ",
+                          sum(outcomes$accepted),
+                          " new translations into ",
+                          wenv$TO_PROJECT,
+                          "/",
+                          to.language,
+                          " from ",
+                          from.project,
+                          "/",
+                          from.language))
     return(sum(outcomes$accepted))
   }
 
@@ -158,10 +173,8 @@ tryposting <- function(slug, to.language, from.directory, conflict, verbose) {
         },
         error = function(e){
           success <<- FALSE
-          if (attempt == 1) cat(">> writing -  HTTP error. Trying 3 times.\n")
-          cat(">> writing -  try #")
-          cat(attempt)
-          cat(" \n")
+          if (attempt == 1) logger(verbose, ">> writing -  HTTP error. Trying 3 times.")
+          logger(verbose, paste(">> writing -  try #", attempt, sep = ""))
           print(e)
         },
         warning = function(w){
