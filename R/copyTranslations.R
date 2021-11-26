@@ -163,13 +163,13 @@ logEntry <- function(component, response) {
   return(cbind(component, cbind(response$status_code, as.data.frame(result))))
 }
 
-tryposting <- function(slug, to.language, from.directory, conflict, verbose) {
+tryposting <- function(slug, to.language, from.directory, conflict, filename, verbose) {
   for (attempt in c(1:3)) {
     success <<- TRUE
     response <-
       tryCatch(
         expr = {
-          postFile(slug = slug, to.language = to.language, from.directory = from.directory, conflict = conflict, verbose = verbose)
+          postFile(slug = slug, to.language = to.language, from.directory = from.directory, conflict = conflict, filename = filename, verbose = verbose)
         },
         error = function(e){
           success <<- FALSE
