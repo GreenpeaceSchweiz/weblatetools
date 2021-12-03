@@ -21,7 +21,9 @@ writeToFile <- function(df, filename, language) {
 
 splitTranslationFile <- function(slug, from.language) {
   df <- readFile(slug, from.language)
-  dfs <- split(df, rep(1:2, each = length(df) / 2))
-  writeToFile(dfs[1], paste(slug, "- 1"), from.language)
-  writeToFile(dfs[2], paste(slug, "- 2"), from.language)
+  midpoint <- floor((nrow(df)/2))
+  df1 <- df[1:midpoint,]
+  df2 <- df[(midpoint+1):nrow(df),]
+  writeToFile(df1, paste(slug, "- 1"), from.language)
+  writeToFile(df2, paste(slug, "- 2"), from.language)
 }
