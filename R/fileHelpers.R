@@ -16,6 +16,7 @@ writeToFile <- function(df, filename, language) {
     df,
     filePath(language, filename),
     na = '""',
+    quote = "all",
     progress = FALSE
   )
 }
