@@ -5,25 +5,31 @@ filePath <- function(language, fileName) {
 }
 
 readFile <- function(filename, language) {
-  df <- read.csv(filePath(language, filename), fileEncoding = "UTF-8")
+  df <- readr::read_csv(filePath(language, filename),
+                        show_col_types = FALSE,
+                        lazy = FALSE) # to prevent locking of the file
   return(df)
 }
 
 writeToFile <- function(df, filename, language) {
-  write.csv(
+  readr::write_csv(
     df,
     filePath(language, filename),
     na = '""',
-    row.names = FALSE,
-    fileEncoding = "UTF-8"
+    progress = FALSE
   )
 }
 
-splitTranslationFile <- function(slug, from.language) {
-  df <- readFile(slug, from.language)
-  midpoint <- floor((nrow(df)/2))
-  df1 <- df[1:midpoint,]
-  df2 <- df[(midpoint+1):nrow(df),]
-  writeToFile(df1, paste(slug, "- 1"), from.language)
-  writeToFile(df2, paste(slug, "- 2"), from.language)
+splitTranslationFile <- function(slug, from.language, size.limit) {
+  count <-  ceiling(file.size(filePath(from.language, slug)) / size.limit)
+  if (count > 1) {
+    df <- readFile(slug, from.language)
+    seg.length <- floor(nrow(df) / count)
+    dfs <- list()
+    for (i in 1:count) {
+      dfs[[i]] <- df[((i-1)*seg.length + 1):(i*seg.length),]
+      writeToFile(dfs[[i]], paste(slug, i, sep =  " - "), from.language)
+    }
+  }
+  return(count)
 }

@@ -11,6 +11,7 @@
 #' @param filter Optional. List of strings. Translations containing any of these strings will not be reuploaded.
 #' @param replace Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".
 #' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
+#' @param size.limit The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
 #'
 #' @return Count of accepted new translations in the destination project.
@@ -34,6 +35,7 @@ copyTranslations <-
            filter,
            replace,
            conflict = "ignore",
+           size.limit = 800000,
            verbose = FALSE) {
     outcomes <- data.frame(matrix(ncol = 8, nrow = 0))
 
@@ -54,36 +56,30 @@ copyTranslations <-
       }
 
       # Post File
-      response <- tryposting(slug = slug,
-                             to.language = to.language,
-                             from.directory = from.language,
-                             conflict = conflict,
-                             verbose = verbose)
-      responselist <- list(response)
-
-      # File too large
-      if (response$status_code == 413) {
-        splitTranslationFile(slug, from.language)
-        response1 <-
-          tryposting(
+      # - Check File Size
+      chunks <- splitTranslationFile(slug, from.language, size.limit)
+      if (chunks == 1) {
+        response <- tryposting(slug = slug,
+                               to.language = to.language,
+                               from.directory = from.language,
+                               conflict = conflict,
+                               verbose = verbose)
+        responselist <- list(response)
+      } else if (chunks > 1) {
+        cat(paste(">> writing -  Split file into", chunks, "parts", sep = " "))
+        responselist <- list()
+        for (i in 1:chunks) {
+          responselist[[i]] <- tryposting(
             slug = slug,
             to.language = to.language,
             from.directory = from.language,
             conflict = conflict,
             verbose = verbose,
-            filename = paste(slug, "- 1")
+            filename = paste(slug, i, sep = " - ")
           )
-        response2 <-
-          tryposting(
-            slug = slug,
-            to.language = to.language,
-            from.directory = from.language,
-            conflict = conflict,
-            verbose = verbose,
-            filename = paste(slug, "- 2")
-          )
-        responselist <- list(response1, response2)
+        }
       }
+
 
       # Store outcomes
       for (response in responselist) {

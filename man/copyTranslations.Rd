@@ -12,6 +12,7 @@ copyTranslations(
   filter,
   replace,
   conflict = "ignore",
+  size.limit = 8e+05,
   verbose = FALSE
 )
 }
@@ -29,6 +30,8 @@ copyTranslations(
 \item{replace}{Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".}
 
 \item{conflict}{Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".}
+
+\item{size.limit}{The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.}
 
 \item{verbose}{Optional. Whether to print a detailed log to the console or not.}
 }
