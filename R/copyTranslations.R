@@ -48,38 +48,25 @@ copyTranslations <-
                           from.project = from.project,
                           from.language = from.language,
                           verbose = verbose)
+
       if (response$status_code != 200) next # couldn't get file, go to next
 
-      # Edit File
-      if (!missing(filter) || !missing(replace)) {
-        editTranslationFile(slug, from.language, filter, replace)
-      }
+      # Edit File (Filter, Replace, Split)
+      chunks <- editTranslationFile(slug, from.language, filter, replace, size.limit)
+
 
       # Post File
-      # - Check File Size
-      chunks <- splitTranslationFile(slug, from.language, size.limit)
-      if (chunks == 1) {
-        response <- tryposting(slug = slug,
-                               to.language = to.language,
-                               from.directory = from.language,
-                               conflict = conflict,
-                               verbose = verbose)
-        responselist <- list(response)
-      } else if (chunks > 1) {
-        cat(paste(">> writing -  Split file into", chunks, "parts\n", sep = " "))
-        responselist <- list()
-        for (i in 1:chunks) {
-          responselist[[i]] <- tryposting(
-            slug = slug,
-            to.language = to.language,
-            from.directory = from.language,
-            conflict = conflict,
-            verbose = verbose,
-            filename = paste(slug, i, sep = " - ")
-          )
-        }
+      responselist <- list()
+      for (i in 1:chunks) {
+        responselist[[i]] <- tryposting(
+          slug = slug,
+          to.language = to.language,
+          from.directory = from.language,
+          conflict = conflict,
+          verbose = verbose,
+          filename = processedFile(slug, i)
+        )
       }
-
 
       # Store outcomes
       for (response in responselist) {
