@@ -66,7 +66,7 @@ copyTranslations <-
                                verbose = verbose)
         responselist <- list(response)
       } else if (chunks > 1) {
-        cat(paste(">> writing -  Split file into", chunks, "parts", sep = " "))
+        cat(paste(">> writing -  Split file into", chunks, "parts\n", sep = " "))
         responselist <- list()
         for (i in 1:chunks) {
           responselist[[i]] <- tryposting(
