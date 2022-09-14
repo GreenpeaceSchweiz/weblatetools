@@ -104,3 +104,36 @@ postFile <-  function(slug,
   logger(verbose, paste(">> writing - ", httr::http_status(response)$message))
   return(response)
 }
+
+
+
+#' Delete translations for a component on the server
+#'
+#' Deletes the translations of the specified component on the server.
+#'
+#' @param slug The component to delete from
+#' @param project The project to delete form
+#' @param language The language to delete from
+#' @param verbose Optional. Whether to print a detailed log to the console or not.
+#'
+#' @return The response from the server, as returned by httr::DELETE().
+#' @export
+deleteTranslations <- function(slug, project, language, verbose = FALSE) {
+  deleteUrl <- paste(
+    wenv$BASE_URL,
+    "translations",
+    project,
+    slug,
+    language,
+    "",
+    sep = "/"
+  )
+  response <- httr::DELETE(
+    url = deleteUrl,
+    config = httr::add_headers(Authorization = wenv$TOKEN)
+  )
+
+  logger(verbose, paste(">> deleting- ", httr::http_status(response)$message))
+  return(response)
+}
+
