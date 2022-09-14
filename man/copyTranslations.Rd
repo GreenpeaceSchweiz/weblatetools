@@ -13,7 +13,10 @@ copyTranslations(
   replace,
   conflict = "ignore",
   size.limit = 8e+05,
-  verbose = FALSE
+  verbose = FALSE,
+  download = TRUE,
+  upload = TRUE,
+  editFunction = editTranslationFile(slug, from.language, filter, replace, size.limit)
 )
 }
 \arguments{
@@ -34,6 +37,12 @@ copyTranslations(
 \item{size.limit}{The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.}
 
 \item{verbose}{Optional. Whether to print a detailed log to the console or not.}
+
+\item{download}{Whether to download translation files (uses files on disk if FALSE).}
+
+\item{upload}{Whether to upload translation files after download (and editing).}
+
+\item{editFunction}{Option to pass a custom function for how to edit the translation files. Needs to save processed files as "slug-x.csv" and return the number of files.}
 }
 \value{
 Count of accepted new translations in the destination project.

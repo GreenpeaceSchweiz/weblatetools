@@ -13,6 +13,9 @@
 #' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
 #' @param size.limit The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
+#' @param download Whether to download translation files (uses files on disk if FALSE).
+#' @param upload Whether to upload translation files after download (and editing).
+#' @param editFunction Option to pass a custom function for how to edit the translation files. Needs to save processed files as "slug-x.csv" and return the number of files.
 #'
 #' @return Count of accepted new translations in the destination project.
 #' @export
@@ -36,95 +39,108 @@ copyTranslations <-
            replace,
            conflict = "ignore",
            size.limit = 800000,
-           verbose = FALSE) {
+           verbose = FALSE,
+           download = TRUE,
+           upload = TRUE,
+           editFunction = editTranslationFile(slug, from.language, filter, replace, size.limit)) {
     outcomes <- data.frame(matrix(ncol = 8, nrow = 0))
 
     # Copy
     for (slug in components) {
       logger(verbose, slug)
 
-      # Get File
-      response <- getFile(slug = slug,
-                          from.project = from.project,
-                          from.language = from.language,
-                          verbose = verbose)
 
-      if (response$status_code != 200) next # couldn't get file, go to next
+      if (download) {
+        # Get File
+        response <- getFile(slug = slug,
+                            from.project = from.project,
+                            from.language = from.language,
+                            verbose = verbose)
+
+        if (response$status_code != 200) next # couldn't get file, go to next
+      }
 
       # Edit File (Filter, Replace, Split)
-      chunks <- editTranslationFile(slug, from.language, filter, replace, size.limit)
+      chunks <- editFunction
 
+      if (upload) {
+        # Post File
+        responselist <- list()
+        for (i in 1:chunks) {
+          responselist[[i]] <- tryposting(
+            slug = slug,
+            to.language = to.language,
+            from.directory = from.language,
+            conflict = conflict,
+            verbose = verbose,
+            filename = processedFile(slug, i)
+          )
+        }
 
-      # Post File
-      responselist <- list()
-      for (i in 1:chunks) {
-        responselist[[i]] <- tryposting(
-          slug = slug,
-          to.language = to.language,
-          from.directory = from.language,
-          conflict = conflict,
-          verbose = verbose,
-          filename = processedFile(slug, i)
-        )
+        # Store outcomes
+        for (response in responselist) {
+          outcomes <- rbind(outcomes, logEntry(slug, response))
+        }
       }
 
-      # Store outcomes
-      for (response in responselist) {
-        outcomes <- rbind(outcomes, logEntry(slug, response))
-      }
     }
 
-    # Log Outcomes
-    colnames(outcomes) <-
-      c("component",
-        "status code",
-        "not found",
-        "skipped",
-        "accepted",
-        "total",
-        "result",
-        "count")
-    log_components <-
-      rbind(c("Total", sum(outcomes$'status code' != 200), colSums(outcomes[,-c(1,2)])), outcomes)
+    if (upload) {
+      # Log Outcomes
+      colnames(outcomes) <-
+        c("component",
+          "status code",
+          "not found",
+          "skipped",
+          "accepted",
+          "total",
+          "result",
+          "count")
+      log_components <-
+        rbind(c("Total", sum(outcomes$'status code' != 200), colSums(outcomes[,-c(1,2)])), outcomes)
 
-    dir.create(file.path("logs"), showWarnings = FALSE)
-    write.csv(
-      log_components,
-      paste(
-        "logs/",
-        format(Sys.time(), "%Y-%m-%d %H%M%S "),
-        from.project,
-        from.language,
-        " outcomes.csv",
-        sep = ""
-      ),
-      row.names = FALSE
-    )
-    if (file_test("-f", "log.csv")) {
-      log_total <- read.csv("log.csv")
+      dir.create(file.path("logs"), showWarnings = FALSE)
+      write.csv(
+        log_components,
+        paste(
+          "logs/",
+          format(Sys.time(), "%Y-%m-%d %H%M%S "),
+          from.project,
+          from.language,
+          " outcomes.csv",
+          sep = ""
+        ),
+        row.names = FALSE
+      )
+      if (file_test("-f", "log.csv")) {
+        log_total <- read.csv("log.csv")
+      } else {
+        log_total <- data.frame(matrix(ncol = 9, nrow = 0))
+      }
+
+      log_total <- rbind(c(
+        format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+        paste(from.project, from.language),
+        paste("gpch", to.language),
+        colSums(outcomes[,-c(1,2)])
+      ), log_total)
+      colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
+      write.csv(log_total, "log.csv", row.names = FALSE)
+      logger(verbose, paste("DONE: Accepted ",
+                            sum(outcomes$accepted),
+                            " new translations into ",
+                            wenv$TO_PROJECT,
+                            "/",
+                            to.language,
+                            " from ",
+                            from.project,
+                            "/",
+                            from.language))
+      return(sum(outcomes$accepted))
     } else {
-      log_total <- data.frame(matrix(ncol = 9, nrow = 0))
+      return(0)
     }
 
-    log_total <- rbind(c(
-      format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
-      paste(from.project, from.language),
-      paste("gpch", to.language),
-      colSums(outcomes[,-c(1,2)])
-    ), log_total)
-    colnames(log_total) <- c("timestamp","source","destination","not.found","skipped","accepted","total","result","count")
-    write.csv(log_total, "log.csv", row.names = FALSE)
-    logger(verbose, paste("DONE: Accepted ",
-                          sum(outcomes$accepted),
-                          " new translations into ",
-                          wenv$TO_PROJECT,
-                          "/",
-                          to.language,
-                          " from ",
-                          from.project,
-                          "/",
-                          from.language))
-    return(sum(outcomes$accepted))
   }
 
 logEntry <- function(component, response) {
