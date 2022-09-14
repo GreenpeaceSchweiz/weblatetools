@@ -6,7 +6,7 @@
 #' @export
 getComponents <- function(project) {
   componentsUrl <-
-    file.path(wenv$BASE_URL, "projects", project, "components")
+    paste(wenv$BASE_URL, "projects", project, "components", "", sep = "/") # last "" to create trailing "/"
 
   components <- data.frame(matrix(ncol = 2, nrow = 0))
   colnames(components) <- c("component", "slug")
@@ -49,7 +49,8 @@ getFile <- function(slug, from.project, from.language, verbose = FALSE) {
     from.project,
     slug,
     from.language,
-    "file?format=csv",
+    "file",
+    "?format=csv",
     sep = "/"
   )
   response <- httr::GET(
@@ -91,7 +92,8 @@ postFile <-  function(slug,
                      wenv$TO_PROJECT, # TODO: highlight importance of setting this right.
                      slug,
                      to.language,
-                     "file/",
+                     "file",
+                     "",
                      sep = "/")
   response <- httr::POST(url = uploadUrl,
                    httr::add_headers(Authorization = wenv$TOKEN),
