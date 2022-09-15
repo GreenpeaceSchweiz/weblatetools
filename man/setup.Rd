@@ -4,7 +4,7 @@
 \alias{setup}
 \title{Initialize some basic environment variables needed for the API calls.}
 \usage{
-setup(api.url, token, to.project)
+setup(api.url, token, to.project, debug = FALSE)
 }
 \arguments{
 \item{api.url}{The URL of your API entry point. Usually ""http://example.com/api/".}
@@ -12,6 +12,8 @@ setup(api.url, token, to.project)
 \item{token}{Your authorization token. See https://docs.weblate.org/en/latest/api.html#authentication-and-generic-parameters}
 
 \item{to.project}{The project you want to upload the translation files to. CAREFUL: make sure to set this to the appropriate project. It is set here instead of in copyTranslations() or postFile() to avoid mistakenly writing to the wrong project.}
+
+\item{debug}{Controls httr verbose logging (httr::verbose()). Defaults to FALSE}
 }
 \value{
 
