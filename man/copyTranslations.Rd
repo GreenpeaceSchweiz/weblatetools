@@ -16,7 +16,7 @@ copyTranslations(
   verbose = FALSE,
   download = TRUE,
   upload = TRUE,
-  editFunction = editTranslationFile(slug, from.language, filter, replace, size.limit)
+  editFunction = editTranslationFile
 )
 }
 \arguments{
@@ -42,7 +42,7 @@ copyTranslations(
 
 \item{upload}{Whether to upload translation files after download (and editing).}
 
-\item{editFunction}{Option to pass a custom function for how to edit the translation files. Needs to save processed files as "slug-x.csv" and return the number of files.}
+\item{editFunction}{Option to pass a custom function for how to edit the translation files. Needs to have parameters (slug, from.language, filter, replace, size.limit), save processed files as "slug-x.csv" and return the number of files.}
 }
 \value{
 Count of accepted new translations in the destination project.
