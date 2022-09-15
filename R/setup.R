@@ -16,6 +16,8 @@ setup <- function(api.url, token, to.project, debug = FALSE){
   wenv$TO_PROJECT <- to.project
   if(debug){
     httr::set_config(httr::verbose())
+  } else {
+    httr::reset_config()
   }
 }
 
