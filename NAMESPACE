@@ -2,6 +2,7 @@
 
 export(copyTranslations)
 export(deleteTranslations)
+export(editTranslationFile)
 export(getComponents)
 export(getFile)
 export(postFile)

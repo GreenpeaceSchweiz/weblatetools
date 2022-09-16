@@ -9,14 +9,11 @@ copyTranslations(
   to.language,
   from.project,
   from.language,
-  filter,
-  replace,
   conflict = "ignore",
-  size.limit = 8e+05,
   verbose = FALSE,
   download = TRUE,
   upload = TRUE,
-  editFunction = NULL,
+  editFunction = editTranslationFile,
   ...
 )
 }
@@ -29,13 +26,7 @@ copyTranslations(
 
 \item{from.language}{The language to copy from.}
 
-\item{filter}{Optional. List of strings. Translations containing any of these strings will not be reuploaded.}
-
-\item{replace}{Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".}
-
 \item{conflict}{Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".}
-
-\item{size.limit}{The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.}
 
 \item{verbose}{Optional. Whether to print a detailed log to the console or not.}
 
@@ -43,17 +34,15 @@ copyTranslations(
 
 \item{upload}{Whether to upload translation files after download (and editing).}
 
-\item{editFunction}{Option to pass a custom function for how to edit the translation files. Defaults to "editTranslationsFiles()". Needs to have at least the parameter "slug", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files.}
+\item{editFunction}{The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.}
 
-\item{...}{Additional parameters to be passed to the custom editFunction.}
+\item{...}{Parameters to be passed to the editFunction. See \code{\link{editTranslationFile}}}
 }
 \value{
 Count of accepted new translations in the destination project.
 }
 \description{
-Download translation files for a Weblate project, edit them (search/replace &
-filter unwanted terms) and then reupload them to the same or a different
-Weblate project.
+Download translation files for a Weblate project, edit them and then reupload them to the same or a different Weblate project.
 }
 \examples{
 \dontrun{

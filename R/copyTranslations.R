@@ -1,22 +1,17 @@
 #' Copy and edit translation files
 #'
-#' Download translation files for a Weblate project, edit them (search/replace &
-#'  filter unwanted terms) and then reupload them to the same or a different
-#'  Weblate project.
+#' Download translation files for a Weblate project, edit them and then reupload them to the same or a different Weblate project.
 #'
 #' @param components A list of component names (slugs).
 #' @param to.language The language to copy to.
 #' @param from.project The project to copy from.
 #' @param from.language The language to copy from.
-#' @param filter Optional. List of strings. Translations containing any of these strings will not be reuploaded.
-#' @param replace Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace".
 #' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
-#' @param size.limit The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing.
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
 #' @param download Whether to download translation files (uses files on disk if FALSE).
 #' @param upload Whether to upload translation files after download (and editing).
-#' @param editFunction Option to pass a custom function for how to edit the translation files. Defaults to "editTranslationsFiles()". Needs to have at least the parameter "slug", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files.
-#' @param ... Additional parameters to be passed to the custom editFunction.
+#' @param editFunction The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.
+#' @param ... Parameters to be passed to the editFunction. See \code{\link{editTranslationFile}}
 #'
 #' @return Count of accepted new translations in the destination project.
 #' @export
@@ -36,14 +31,11 @@ copyTranslations <-
            to.language,
            from.project,
            from.language,
-           filter,
-           replace,
            conflict = "ignore",
-           size.limit = 800000,
            verbose = FALSE,
            download = TRUE,
            upload = TRUE,
-           editFunction = NULL,
+           editFunction = editTranslationFile,
            ...) {
     outcomes <- data.frame(matrix(ncol = 8, nrow = 0))
 
@@ -63,12 +55,7 @@ copyTranslations <-
       }
 
       # Edit File (Filter, Replace, Split)
-      chunks <- 0
-      if (is.null(editFunction)){
-        chunks <- editTranslationFile(slug, from.language, filter, replace, size.limit)
-      } else {
-        chunks <- editFunction(slug, ...)
-      }
+      chunks <- editFunction(slug, from.language, ...)
 
 
       if (upload) {
