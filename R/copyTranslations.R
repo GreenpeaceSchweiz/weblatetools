@@ -15,7 +15,8 @@
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
 #' @param download Whether to download translation files (uses files on disk if FALSE).
 #' @param upload Whether to upload translation files after download (and editing).
-#' @param editFunction Option to pass a custom function for how to edit the translation files. Needs to have parameters (slug, from.language, filter, replace, size.limit), save processed files as "slug-x.csv" and return the number of files.
+#' @param editFunction Option to pass a custom function for how to edit the translation files. Defaults to "editTranslationsFiles()". Needs to have at least the parameter "slug", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files.
+#' @param ... Additional parameters to be passed to the custom editFunction.
 #'
 #' @return Count of accepted new translations in the destination project.
 #' @export
@@ -42,7 +43,8 @@ copyTranslations <-
            verbose = FALSE,
            download = TRUE,
            upload = TRUE,
-           editFunction = editTranslationFile) {
+           editFunction = NULL,
+           ...) {
     outcomes <- data.frame(matrix(ncol = 8, nrow = 0))
 
     # Copy
@@ -61,7 +63,13 @@ copyTranslations <-
       }
 
       # Edit File (Filter, Replace, Split)
-      chunks <- editFunction(slug, from.language, filter, replace, size.limit)
+      chunks <- 0
+      if (is.null(editFunction)){
+        chunks <- editTranslationFile(slug, from.language, filter, replace, size.limit)
+      } else {
+        chunks <- editFunction(slug, ...)
+      }
+
 
       if (upload) {
         # Post File
