@@ -4,10 +4,10 @@
 \alias{setup}
 \title{Initialize some basic environment variables needed for the API calls.}
 \usage{
-setup(api.url, token, to.project, debug = FALSE)
+setup(base.url, token, to.project, debug = FALSE)
 }
 \arguments{
-\item{api.url}{The URL of your API entry point. Usually ""http://example.com/api/".}
+\item{base.url}{The URL of your Weblate instance. This is the same URL that you would use to access the Weblate web interface in your browser. "https://example.com" (no trailing "/").}
 
 \item{token}{Your authorization token. See https://docs.weblate.org/en/latest/api.html#authentication-and-generic-parameters}
 

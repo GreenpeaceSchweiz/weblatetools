@@ -8,9 +8,10 @@
 #' @param from.language The language to copy from.
 #' @param conflict Optional. How to handle conflicts on the server. One of "ignore", "replace-translated" or "replace-approved".
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
-#' @param download Whether to download translation files (uses files on disk if FALSE).
-#' @param upload Whether to upload translation files after download (and editing).
-#' @param editFunction The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.
+#' @param download Optional. Whether to download translation files (uses files on disk if FALSE).
+#' @param download.method Optional. Which method to use to download the translation files. See \code{\link{getFile}}.
+#' @param upload Optional. Whether to upload translation files after download (and editing).
+#' @param editFunction Optional. The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.
 #' @param ... Parameters to be passed to the editFunction. See \code{\link{editTranslationFile}}
 #'
 #' @return Count of accepted new translations in the destination project.
@@ -34,6 +35,7 @@ copyTranslations <-
            conflict = "ignore",
            verbose = FALSE,
            download = TRUE,
+           download.method = "api",
            upload = TRUE,
            editFunction = editTranslationFile,
            ...) {
@@ -49,6 +51,7 @@ copyTranslations <-
         response <- getFile(slug = slug,
                             from.project = from.project,
                             from.language = from.language,
+                            method = download.method,
                             verbose = verbose)
 
         if (response$status_code != 200) next # couldn't get file, go to next

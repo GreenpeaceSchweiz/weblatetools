@@ -12,6 +12,7 @@ copyTranslations(
   conflict = "ignore",
   verbose = FALSE,
   download = TRUE,
+  download.method = "api",
   upload = TRUE,
   editFunction = editTranslationFile,
   ...
@@ -30,11 +31,13 @@ copyTranslations(
 
 \item{verbose}{Optional. Whether to print a detailed log to the console or not.}
 
-\item{download}{Whether to download translation files (uses files on disk if FALSE).}
+\item{download}{Optional. Whether to download translation files (uses files on disk if FALSE).}
 
-\item{upload}{Whether to upload translation files after download (and editing).}
+\item{download.method}{Optional. Which method to use to download the translation files. See \code{\link{getFile}}.}
 
-\item{editFunction}{The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.}
+\item{upload}{Optional. Whether to upload translation files after download (and editing).}
+
+\item{editFunction}{Optional. The function to edit the translation files. Defaults to \code{\link{editTranslationFile}}. Needs to have at least the parameters "slug" and "from.language", save processed files as "slug-i.csv" (with i in 1:n) and return n the number of created files. During upload, all of processed files will be uploaded.}
 
 \item{...}{Parameters to be passed to the editFunction. See \code{\link{editTranslationFile}}}
 }

@@ -40,7 +40,7 @@ setwd("~/myproject")
 # Initialize some base parameters. "to.project" is set here instead of in 
 # copyTranslations() or postFile() to avoid mistakenly writing to the wrong 
 # project.
-setup(api.url = "https://example.com/api",
+setup(api.url = "https://example.com",
       token = readLines("token.txt"),
       to.project = "B")
 

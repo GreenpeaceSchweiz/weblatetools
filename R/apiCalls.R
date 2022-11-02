@@ -6,7 +6,7 @@
 #' @export
 getComponents <- function(project) {
   componentsUrl <-
-    paste(wenv$BASE_URL, "projects", project, "components", "", sep = "/") # last "" to create trailing "/"
+    paste(wenv$API_URL, "projects", project, "components", "", sep = "/") # last "" to create trailing "/"
 
   components <- data.frame(matrix(ncol = 2, nrow = 0))
   colnames(components) <- c("component", "slug")
@@ -38,24 +38,42 @@ getComponents <- function(project) {
 #' @param slug The slug of the component to download the translation file from.
 #' @param from.project The project to download the file from.
 #' @param from.language The language to download the file from.
+#' @param method How to get the file. "api" or "public". If "public" is specified, the file is downloaded from the \code{public.url} provided in \code{\link{setup}}, without using the token for authorization. Only works if the file is publicly available.
 #' @param verbose Optional. Whether to print a detailed log to the console or not.
 #'
 #' @return The response from the server, as returned by httr::GET().
 #' @export
-getFile <- function(slug, from.project, from.language, verbose = FALSE) {
-  downloadUrl <- paste(
-    wenv$BASE_URL,
-    "translations",
-    from.project,
-    slug,
-    from.language,
-    "file",
-    "?format=csv",
-    sep = "/"
-  )
+getFile <- function(slug, from.project, from.language, method = "api", verbose = FALSE) {
+  if (method == "api") {
+    downloadUrl <- paste(
+      wenv$API_URL,
+      "translations",
+      from.project,
+      slug,
+      from.language,
+      "file",
+      "?format=csv",
+      sep = "/"
+    )
+    header <- c(Authorization = wenv$TOKEN)
+  } else if (method == "public") {
+    downloadUrl <- paste(
+      wenv$BASE_URL,
+      "download",
+      from.project,
+      slug,
+      from.language,
+      "?format=csv",
+      sep = "/"
+    )
+    header <- ""
+  } else {
+    stop("Invalid method specified.")
+  }
+
   response <- httr::GET(
     url = downloadUrl,
-    config = httr::add_headers(Authorization = wenv$TOKEN),
+    config = httr::add_headers(header),
     httr::write_disk(filePath(from.language, slug), overwrite = TRUE) # TODO don't write to disk or make optional
   )
 
@@ -87,7 +105,7 @@ postFile <-  function(slug,
   if (missing(filename)) {
     filename <- slug
   }
-  uploadUrl <- paste(wenv$BASE_URL,
+  uploadUrl <- paste(wenv$API_URL,
                      "translations",
                      wenv$TO_PROJECT, # TODO: highlight importance of setting this right.
                      slug,

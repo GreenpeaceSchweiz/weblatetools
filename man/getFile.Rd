@@ -4,7 +4,7 @@
 \alias{getFile}
 \title{Download a translation file.}
 \usage{
-getFile(slug, from.project, from.language, verbose = FALSE)
+getFile(slug, from.project, from.language, method = "api", verbose = FALSE)
 }
 \arguments{
 \item{slug}{The slug of the component to download the translation file from.}
@@ -12,6 +12,8 @@ getFile(slug, from.project, from.language, verbose = FALSE)
 \item{from.project}{The project to download the file from.}
 
 \item{from.language}{The language to download the file from.}
+
+\item{method}{How to get the file. "api" or "public". If "public" is specified, the file is downloaded from the \code{public.url} provided in \code{\link{setup}}, without using the token for authorization. Only works if the file is publicly available.}
 
 \item{verbose}{Optional. Whether to print a detailed log to the console or not.}
 }
