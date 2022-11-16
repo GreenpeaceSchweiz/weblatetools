@@ -119,7 +119,8 @@ postFile <-  function(slug,
                    body = list(file = httr::upload_file(filePath(
                      from.directory, filename)
                    ),
-                   conflict = conflict)
+                   conflict = conflict,
+                   fuzzy = "process")
   )
   logger(verbose, paste(">> writing - ", httr::http_status(response)$message))
   return(response)

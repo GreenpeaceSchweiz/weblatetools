@@ -10,7 +10,7 @@ processedFile <- function(slug, i = 1) {
 
 readFile <- function(filename, language) {
   df <- readr::read_csv(filePath(language, filename),
-                        show_col_types = FALSE,
+                        col_types = "cccccccc",
                         lazy = FALSE) # to prevent locking of the file
   return(df)
 }

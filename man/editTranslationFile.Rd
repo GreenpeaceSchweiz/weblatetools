@@ -2,20 +2,29 @@
 % Please edit documentation in R/editTranslations.R
 \name{editTranslationFile}
 \alias{editTranslationFile}
-\title{Edit translation files}
+\title{Edit translation file}
 \usage{
-editTranslationFile(slug, from.language, filter, replace, size.limit = 8e+05)
+editTranslationFile(
+  slug,
+  from.language,
+  filter,
+  replace,
+  fuzzy,
+  size.limit = 8e+05
+)
 }
 \arguments{
 \item{slug}{The slug of the component the translation file belongs to.}
 
 \item{from.language}{The source language of the translation file.}
 
-\item{filter}{Optional. List of strings. Translations containing any of these strings will be removed from the translation file.}
+\item{filter}{Optional. String vector. Translations containing any of these strings will be removed from the translation file. Supports regex, case-sensitive.}
 
-\item{replace}{Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace". Translation strings will be edited according to these patterns.}
+\item{replace}{Optional. Data frame of search/replace string pairs. Needs to contain a column "pattern" and a column "replace". Translation strings will be edited according to these patterns. Supports regex, case-sensitive.}
 
-\item{size.limit}{The servers file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing. Translation files bigger than this will be split into multiple smaller files.}
+\item{fuzzy}{Optional. String vector. Translations matching any of these will be marked with "needs editing". Supports regex, case-sensitive.}
+
+\item{size.limit}{The server's file size limit for uploads. Defaults to 800000. Decrease if getting HTTP 413 error on writing. Translation files bigger than this will be split into multiple smaller files.}
 }
 \value{
 The number of saved processed files.
